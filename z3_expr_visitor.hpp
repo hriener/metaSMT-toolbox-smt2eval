@@ -16,9 +16,9 @@
  */
 
 /**
- * @file consistency_checker.hpp
+ * @file z3_expr_visitor.hpp
  *
- * @brief pretty printing z3 expressions
+ * @brief visitor for z3::expr
  *
  * @author Heinz Riener
  * @since  1.0
@@ -66,45 +66,44 @@ public:
     const Z3_decl_kind& decl_kind = decl.decl_kind();
 
     result_type r;
-    switch( decl_kind )
+    if ( decl_kind == Z3_OP_TRUE )
     {
-    case Z3_OP_TRUE:
       r = evaluate( solver, True );
-      break;
-    case Z3_OP_FALSE:
+    }
+    else if ( decl_kind == Z3_OP_FALSE )
+    {
       r = evaluate( solver, False );
-      break;
-    case Z3_OP_BNUM:
+    }
+    else if ( decl_kind == Z3_OP_BNUM )
+    {
+      const std::string value = expr_to_bin( e );
+      r = evaluate( solver, bvbin( value ) );
+    }
+    else if ( e.is_app() && e.is_const() && !e.is_numeral() )
+    {
+      /* variable */
+      const z3::sort& sort = decl.range();
+      const Z3_sort_kind& sort_kind = sort.sort_kind();
+      if ( sort_kind == Z3_BOOL_SORT )
       {
-        const std::string value = expr_to_bin( e );
-        r = evaluate( solver, bvbin( value ) );
+        r = evaluate( solver, new_variable() );
       }
-      break;
-    case 0x92d:
+      else if ( sort_kind == Z3_BV_SORT )
       {
-        /* variable */
-        const z3::sort& sort = decl.range();
-        const Z3_sort_kind& sort_kind = sort.sort_kind();
-        if ( sort_kind == Z3_BOOL_SORT )
-        {
-          r = evaluate( solver, new_variable() );
-        }
-        else if ( sort_kind == Z3_BV_SORT )
-        {
-          const unsigned w = decl.range().bv_size();
-          r = evaluate( solver, new_bitvector( w ) );
-        }
-        else if ( sort_kind == Z3_INT_SORT )
-        {
-          assert( false && "Integer variables are not supported by metaSMT" );
-        }
-        else
-        {
-          assert( false && "Unsupported range type" );
-        }
-        break;
+        const unsigned w = decl.range().bv_size();
+        r = evaluate( solver, new_bitvector( w ) );
       }
-    default:
+      else if ( sort_kind == Z3_INT_SORT )
+      {
+        assert( false && "Integer variables are not supported by metaSMT" );
+      }
+      else
+      {
+        assert( false && "Unsupported range type" );
+      }
+    }
+    else
+    {
       std::cerr << "[e] convert_constant_or_variable: does not support expression of type " << decl.name().str() << " [ " << std::hex << decl_kind << "]\n";
       assert( false );
     }
@@ -629,7 +628,7 @@ public:
     }
     else
     {
-      assert( false && "Yet not implemented. Please report a bug to the developers." );
+      assert( false && "yet not implemented." );
     }
     return evaluate( solver, False );
   }

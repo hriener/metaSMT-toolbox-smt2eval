@@ -16,7 +16,7 @@
  */
 
 /**
- * @file consistency_check.hpp
+ * @file sat_check.hpp
  *
  * @brief consistency checking between metaSMT and Z3 for SMT-LIB2 instances
  *
