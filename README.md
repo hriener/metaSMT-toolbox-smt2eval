@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # metaSMT-toolbox-smt2eval
 
 `metaSMT-toolbox-smt2eval` is a `metaSMT` toolbox project that allows
@@ -9,7 +11,6 @@ files in SMT-LIB2 format and `metaSMT` to evaluate them.
 
 The following software is required in order to build `metaSMT-toolbox-smt2eval`
 
-* git
 * metaSMT
 * Z3
 
